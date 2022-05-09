@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.free.dao.IFreeBoardDao">
+	<select id="getTotalRowCount" parameterType="com.study.free.vo.FreeBoardSearchVO" resultType="int">
+		SELECT count(*) 	  
+		FROM free_board  		
+		WHERE bo_del_yn = 'N' 
+	</select>
+	<select id="getBoardList" parameterType="com.study.free.vo.FreeBoardSearchVO" resultType="com.study.free.vo.FreeBoardVO">
+		select * 				  										
+		from (select a.*, rownum AS rnum				  					
+		      from (SELECT 							    			  		
+		 	  				   to_char(bo_reg_date, 'YYYY-MM-DD') AS bo_reg_date
+							 , to_char(bo_mod_date, 'YYYY-MM-DD') AS bo_mod_dat
+		  				 	 , bo_no       , bo_title , bo_category 				
+		   				     , bo_writer   , bo_pass  , bo_content  				
+		  				 	 , bo_ip       , bo_hit   , bo_del_yn  				 
+		   				 	 , b.comm_nm	AS bo_category_nm			  		
+					   		 FROM											 		
+		   				 		  free_board a, comm_code b				 				
+					   		 WHERE a.bo_category = b.comm_cd			 				  	
+					   		 AND	 bo_del_yn = 'N'		 		
+					   		 order by bo_no desc ) a ) b		
+		where rnum between #{firstRow} and #{lastRow}	 						  	 				
+	</select>
+	<select id="getBoard" parameterType="int" resultType="com.study.free.vo.FreeBoardVO">
+		SELECT										 				
+			 	 to_char(bo_reg_date, 'YYYY-MM-DD') AS bo_reg_date 
+			   , to_char(bo_mod_date, 'YYYY-MM-DD') AS bo_mod_date	
+			   , bo_no       , bo_title , bo_category 				 
+			   , bo_writer   , bo_pass  , bo_content  				 
+			   , bo_ip       , bo_hit   , bo_del_yn  				 
+			   , b.comm_nm	AS bo_category_nm			  				
+		FROM											 			
+		   free_board a, comm_code b				 		
+		WHERE a.bo_category = b.comm_cd			 				
+		AND bo_no = #{boNo}								 		
+		AND bo_del_yn = 'N'							 				
+		ORDER BY bo_no  asc							 				
+	</select>
+	<update id="increaseHit" parameterType="int">
+		UPDATE free_board SET 
+		bo_hit = bo_hit + 1   
+		WHERE bo_no = #{boNo}		  
+	</update>
+	<update id="updateBoard" parameterType="com.study.free.vo.FreeBoardVO">
+		UPDATE free_board SET       
+		      bo_title    = #{boTitle}       
+		    , bo_category = #{boCategory}       
+		    , bo_content  = #{boContent}
+		    , bo_hit      = bo_hit+1
+		    , bo_mod_date  = sysdate  
+		where bo_no       = #{boNo}		  
+	</update>
+	<update id="deleteBoard" parameterType="com.study.free.vo.FreeBoardVO">
+		UPDATE free_board SET   
+		bo_del_yn    = 'Y'      
+		where bo_no  = #{boNo}		
+	</update>
+	<insert id="insertBoard" parameterType="com.study.free.vo.FreeBoardVO">
+		 INSERT INTO free_board ( 						     
+		       bo_no       , bo_title , bo_category    
+		     , bo_writer   , bo_pass  , bo_content     
+		     , bo_ip       , bo_hit   , bo_reg_date    
+		     , bo_mod_date , bo_del_yn 				 
+ 		) VALUES ( 									   
+       	SEQ_FREE_BOARD.nextval ,   #{boTitle}     ,    #{boCategory}   
+	       , #{boWriter}          ,   #{boPass}      ,    #{boContent} 			
+	       , #{boIp}         	  ,   0      ,    sysdate 		  
+	       , null      		      ,  'N'  						     
+       )					  						     
+	</insert>
+</mapper>

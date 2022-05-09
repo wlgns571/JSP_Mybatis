@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.code.dao.ICommCodeDao">
+		<!-- EL의 $와 #차이랑 mybatis의 $,#은 관계가 없다. 
+			 mybatis의 $는 statement, #은 preparedStatement
+			 => ''를 자동으로 처리해주는 코드가 preParedStateMent
+			 ===> EL은 $쓰고 mybatis는 #을 쓰도록.
+		-->
+	<select id="getCodeListByParent" resultType="com.study.code.vo.CodeVO" parameterType="String">
+		SELECT	comm_cd  , comm_nm  , comm_parent  , comm_ord	  
+		FROM  comm_code	WHERE comm_parent = #{parentCode}								  
+	</select>	
+</mapper>
